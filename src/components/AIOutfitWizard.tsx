@@ -313,8 +313,8 @@ export const AIOutfitWizard: React.FC<AIOutfitWizardProps> = ({
 
         {/* Content Area */}
         <div className="flex-1 overflow-hidden relative px-6">
-          {step !== 'results' && renderContextStep()}
-          
+          {step === 'context' && renderContextStep()}
+          {step === 'generating' && renderGenerating()}
           {step === 'results' && renderResults()}
         </div>
       </div>

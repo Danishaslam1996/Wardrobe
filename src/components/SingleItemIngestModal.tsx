@@ -76,9 +76,11 @@ export const SingleItemIngestModal: React.FC<SingleItemIngestModalProps> = ({
               name: analysis.name,
               category: (analysis.category as ClothingCategory) || 'tops'
             };
-          } catch (err) {
-            console.error("Analysis failed for item", err);
-            if (err instanceof TypeError && err.message === 'Failed to fetch') {
+          } catch (err: any) {
+            console.error("Analysis failed for item", err?.message || err);
+            if (err?.message?.includes('GEMINI_API_KEY') || err?.message?.includes('Gemini API Key')) {
+               alert("Please click the Settings (gear) icon in the top right to set your Gemini API key.");
+            } else if (err instanceof TypeError && err.message === 'Failed to fetch') {
                alert("Network error: Could not reach the AI server. If you are using an ad-blocker, please disable it for this site and try again, or check your internet connection.");
             }
             return {

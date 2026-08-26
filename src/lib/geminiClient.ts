@@ -132,26 +132,27 @@ export async function requestAnalyzeItem(
   return json.data;
 }
 
-export async function requestDailyPick(
-  payload: {
-    profileId: string;
-    weather: any;
-    context: any;
-    availableItems: any[];
-  },
-  customApiKey?: string
-): Promise<DailyPickResponse> {
-  const res = await fetch('/api/gemini/daily-pick', {
+export async function requestDailyPick(params: any, apiKey?: string): Promise<DailyPickResponse> {
+  const response = await fetch('/api/gemini/daily-pick', {
     method: 'POST',
-    headers: getHeaders(customApiKey),
-    body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json',
+      ...(apiKey ? { 'x-gemini-key': apiKey } : {})
+    },
+    body: JSON.stringify({
+      profileId: params.profileId,
+      availableItems: params.availableItems,
+      weather: params.weather,
+      whoMeeting: params.context?.whoMeeting || '',
+      vibes: params.context?.vibes || [],
+      occasion: params.context?.occasion || '',
+      notes: params.context?.notes || ''
+    })
   });
 
-  const json = await res.json();
-  if (!res.ok || !json.success) {
-    throw new Error(json.error || 'Failed to generate Daily Pick');
-  }
-  return json.data;
+  const data = await response.json();
+  if (!data.success) throw new Error(data.error || 'Failed to curate outfit.');
+  return data.data;
 }
 
 export async function requestBuySkipAnalysis(

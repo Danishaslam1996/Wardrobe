@@ -48,7 +48,7 @@ async function buildImagePart(imageBase64: string, fallbackMimeType: string = 'i
 function getGeminiClient(customApiKey?: string): GoogleGenAI {
   const apiKey = customApiKey || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable is missing.');
+    throw new Error('Missing Gemini API Key. Please click the Settings gear icon in the top right to configure your API Key.');
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -268,7 +268,7 @@ ${existingItemsSummary || 'None currently registered'}`;
       const imagePart = await buildImagePart(imageBase64, mimeType);
 
       let response: any;
-      const primaryModel = 'gemini-2.5-flash';
+      const primaryModel = 'gemini-3.6-flash';
 
       try {
         response = await ai.models.generateContent({
@@ -309,7 +309,7 @@ ${existingItemsSummary || 'None currently registered'}`;
         console.warn('Primary Gemini model 3.6-flash encountered issue, trying 3.7-flash...', geminiErr?.message);
         try {
           response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-3.6-flash',
             contents: {
               parts: [imagePart, { text: prompt }],
             },
@@ -378,7 +378,7 @@ ${existingItemsSummary || 'No items registered yet'}`;
       const imagePart = await buildImagePart(imageBase64, mimeType);
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: {
           parts: [imagePart, { text: prompt }],
         },
@@ -469,7 +469,7 @@ Provide a comprehensive luxury critique in JSON:
 - "editorialCritique": 2-3 sentence luxury editorial critique`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
@@ -508,7 +508,7 @@ Provide a comprehensive luxury critique in JSON:
   // Daily Pick & Occasion Styling Recommendation Endpoint
   app.post('/api/gemini/daily-pick', async (req, res) => {
     try {
-      const { profileId = 'danish', availableItems = [], weather, context } = req.body;
+      const { profileId = 'danish', availableItems = [], weather, whoMeeting, vibes, occasion, notes } = req.body;
       const customApiKey = req.headers['x-gemini-key'] as string | undefined;
 
       const ai = getGeminiClient(customApiKey);
@@ -530,10 +530,10 @@ ${isEesha
 }
 
 ENVIRONMENT CONTEXT:
-Who they are meeting: ${context.whoMeeting || 'Not specified'}
-Desired Vibes: ${(context.vibes || []).join(', ') || 'Not specified'}
-Occasion & Setting: ${context.occasion || 'Everyday styling'}
-Additional Styling Notes/Weather: ${context.notes || 'None'}
+Who they are meeting: ${whoMeeting || 'Not specified'}
+Desired Vibes: ${(vibes || []).join(', ') || 'Not specified'}
+Occasion & Setting: ${occasion || 'Everyday styling'}
+Additional Styling Notes/Weather: ${notes || 'None'}
 Weather: ${JSON.stringify(weather || { tempC: 20, condition: 'Clear' })}
 
 Available Wardrobe:
@@ -544,7 +544,7 @@ Select the most harmonious set of item IDs for a complete ensemble from the Avai
 Return valid JSON matching the schema.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
@@ -571,7 +571,7 @@ Return valid JSON matching the schema.`;
   });
 
   // Vite middleware for development
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.K_SERVICE !== undefined || fs.existsSync(path.join(process.cwd(), 'dist', 'index.html'));
+  const isProduction = process.env.NODE_ENV === 'production';
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
