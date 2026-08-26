@@ -1,0 +1,6 @@
+{
+  "name": "Daily Threads",
+  "description": "Dual-profile luxury digital wardrobe, AI stylist, and outfit planner powered by Gemini.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
